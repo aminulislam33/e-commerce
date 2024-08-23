@@ -1,10 +1,10 @@
 const Order = require("../model/order");
 
-async function createOrder(req, res) {
+async function placeOrder(req, res) {
     const { products, totalAmount } = req.body;
     try {
         const order = new Order({
-            user: req.user._id,
+            user: req.user.id,
             products,
             totalAmount,
         });
@@ -60,7 +60,7 @@ async function deleteOrder(req, res) {
 };
 
 module.exports = {
-    createOrder,
+    placeOrder,
     singleOrder,
     multipleOrder,
     updateOrderStatus,
