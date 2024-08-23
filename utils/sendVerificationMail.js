@@ -10,10 +10,11 @@ const sendVerificationEmail = async (user) => {
     });
 
     const verificationToken = user.generateVerificationToken();
+    console.log(`${process.env.BASE_URL}/api/auth/verify/${verificationToken}`);
     await user.save();
 
     const mailOptions = {
-        from: 'your-email@example.com',
+        from: 'no-reply@aminuldev.me',
         to: user.email,
         subject: 'Email Verification',
         text: `Please verify your email by clicking on the following link: \n\n

@@ -1,3 +1,5 @@
+const nodemailer = require('nodemailer');
+
 const sendResetPasswordEmail = async (user) => {
     const transporter = nodemailer.createTransport({
         service: 'Gmail',
@@ -9,14 +11,15 @@ const sendResetPasswordEmail = async (user) => {
 
     const resetToken = user.generateResetPasswordToken();
     await user.save();
+    console.log(`${process.env.BASE_URL}/api/auth/reset/${resetToken}`);
 
     const mailOptions = {
-        from: 'your-email@example.com',
+        from: 'no-reply@aminuldev.me',
         to: user.email,
         subject: 'Password Reset Request',
         text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
-        Please click on the following link, or paste this into your browser to complete the process:\n\n
-        ${process.env.BASE_URL}/api/auth/reset/${resetToken}\n\n
+        Please click on the following link, or paste this into your browser to complete the process:\n
+        ${process.env.BASE_URL}/api/auth/reset/${resetToken}\n
         If you did not request this, please ignore this email and your password will remain unchanged.`,
     };
 

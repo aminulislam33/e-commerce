@@ -1,5 +1,5 @@
 const User = require("../models/user");
-const { sendResetPasswordEmail } = require("../utils/sendPasswdResetEmail");
+const sendResetPasswordEmail = require("../utils/sendPasswdResetEmail");
 
 async function handleSendPasswdResetEmail(req, res) {
     const { email } = req.body;
