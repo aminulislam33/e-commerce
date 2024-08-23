@@ -12,7 +12,7 @@ router.get("/user", verifyToken, getUserData);
 router.get("/verify/:token", verifyEmail);
 router.post('/forgot-password', handleSendPasswdResetEmail);
 router.post('/reset/:token', handlePasswdReset);
-router.get('/admin-only', verifyToken, authorizeRoles(['admin']), (req, res) => {
+router.get('/admin', verifyToken, authorizeRoles(['admin']), (req, res) => {
     res.status(200).json({ msg: 'Welcome, admin!' });
   });
 
