@@ -52,27 +52,37 @@
         }
 
         async function handleOrder(event) {
-            event.preventDefault(); // Prevent the default form submission behavior
+            event.preventDefault();
 
             const productId = window.location.pathname.split('/').pop();
             const quantity = document.getElementById('quantity').value;
-            const token = localStorage.getItem('token'); // Get token from localStorage
+            const token = localStorage.getItem('token');
+            const price = parseFloat(document.getElementById('product-price').textContent);
+
+            const requestBody = {
+                products: [
+                    {
+                        product: productId,
+                        quantity: quantity,
+                        price: price
+                    }
+                ],
+                totalAmount: quantity * price
+            };
+
+            console.log(requestBody);
 
             try {
                 const response = await fetch('/api/order/create', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` 
+                        'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        products: [{
-                            product: productId,
-                            quantity: parseInt(quantity, 10),
-                            price: parseFloat(document.getElementById('product-price').textContent)
-                        }]
-                    })
+                    body: JSON.stringify(requestBody)
                 });
+
+                console.log("reponse is: ", response.json);
 
                 if (response.ok) {
                     const result = await response.json();
