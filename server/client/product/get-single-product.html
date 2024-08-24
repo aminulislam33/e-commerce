@@ -89,7 +89,16 @@
                     document.getElementById('order-message').textContent = 'Order placed successfully!';
                     document.getElementById('order-message').style.color = 'green';
                 } else {
-                    throw new Error('Failed to place order');
+                    const result = await response.json();
+                    if (result.msg === 'Token is not valid. Please log in again.') {
+                        document.getElementById('order-message').textContent = 'Session expired. Please log in again.';
+                        document.getElementById('order-message').style.color = 'red';
+                        setTimeout(() => {
+                            window.location.href = '/user/login';
+                        }, 3000);
+                    } else {
+                        throw new Error('Failed to place order');
+                    }
                 }
             } catch (err) {
                 console.error('Error placing order:', err);
