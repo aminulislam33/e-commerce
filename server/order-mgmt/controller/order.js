@@ -4,7 +4,7 @@ async function placeOrder(req, res) {
     const { products, totalAmount } = req.body;
     try {
         const order = new Order({
-            user: req.user.id,
+            user: req.user._id,
             products,
             totalAmount,
         });

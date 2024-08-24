@@ -5,7 +5,7 @@ const authorizeRoles = require('../../user-mgmt/middleware/auth');
 
 const router = express.Router();
 
-router.post('/', verifyToken, placeOrder);
+router.post('/create', placeOrder);
 router.get("/:id", verifyToken, singleOrder);
 router.get("/user/:userId", verifyToken, multipleOrder);
 router.put("/:id/status", verifyToken, authorizeRoles(['admin']), updateOrderStatus);

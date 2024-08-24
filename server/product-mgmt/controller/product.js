@@ -1,3 +1,4 @@
+const { json } = require("express");
 const Product = require("../model/product");
 
 async function createProduct(req, res) {

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+</head>
+
+<body>
+    <div id="product-details">
+        <h1 id="product-name">Loading...</h1>
+        <img id="product-image" src="" alt="Product Image" style="width:300px;height:300px;">
+        <p id="product-description"></p>
+        <p><strong>Price:</strong> ₹<span id="product-price"></span></p>
+        <p><strong>Category:</strong> <span id="product-category"></span></p>
+        <p><strong>In Stock:</strong> <span id="product-stock"></span></p>
+
+        <!-- Order Form -->
+        <form id="order-form">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" min="1" required>
+            <button type="submit">Order Now</button>
+        </form>
+
+        <p id="order-message"></p>
+    </div>
+
+    <script>
+        async function fetchProduct() {
+            const path = window.location.pathname;
+            const productId = path.split('/').pop();
+
+            try {
+                const response = await fetch(`/api/product/${productId}`);
+                if (!response.ok) {
+                    throw new Error('Product not found');
+                }
+                const product = await response.json();
+
+                document.getElementById('product-name').textContent = product.name;
+                document.getElementById('product-image').src = product.image;
+                document.getElementById('product-description').textContent = product.description;
+                document.getElementById('product-price').textContent = product.price;
+                document.getElementById('product-category').textContent = product.category;
+                document.getElementById('product-stock').textContent = product.stock;
+                document.getElementById('quantity').max = product.stock; // Set max quantity based on stock
+            } catch (err) {
+                console.error('Error fetching product:', err);
+                document.getElementById('product-details').textContent = 'Error loading product details.';
+            }
+        }
+
+        async function handleOrder(event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+
+            const productId = window.location.pathname.split('/').pop();
+            const quantity = document.getElementById('quantity').value;
+            const token = localStorage.getItem('token'); // Get token from localStorage
+
+            try {
+                const response = await fetch('/api/order/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({
+                        products: [{
+                            product: productId,
+                            quantity: parseInt(quantity, 10),
+                            price: parseFloat(document.getElementById('product-price').textContent)
+                        }]
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('order-message').textContent = 'Order placed successfully!';
+                    document.getElementById('order-message').style.color = 'green';
+                } else {
+                    throw new Error('Failed to place order');
+                }
+            } catch (err) {
+                console.error('Error placing order:', err);
+                document.getElementById('order-message').textContent = 'Error placing order.';
+                document.getElementById('order-message').style.color = 'red';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProduct();
+            document.getElementById('order-form').addEventListener('submit', handleOrder);
+        });
+    </script>
+</body>
+
+</html>
