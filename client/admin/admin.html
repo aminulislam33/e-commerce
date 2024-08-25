@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+</head>
+
+<body>
+    <h1>Add Product</h1>
+    <form id="addProductForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" step="0.01" required>
+
+        <label for="image">Image URL:</label>
+        <input type="text" id="image" name="image" required>
+
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category" required>
+
+        <label for="stock">Stock:</label>
+        <input type="number" id="stock" name="stock" required>
+
+        <button type="submit">Add Product</button>
+    </form>
+
+    <div id="message" style="margin-top: 20px;"></div>
+
+    <script>
+        function getAuthToken() {
+            return localStorage.getItem('token');
+        }
+
+        document.getElementById('addProductForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/product/add-product', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const messageElement = document.getElementById('message');
+
+                if (response.ok) {
+                    const responseData = await response.json();
+                    messageElement.innerText = responseData.msg || 'Product added successfully!';
+                    messageElement.style.color = 'green';
+                } else {
+                    const errorData = await response.json();
+                    messageElement.innerText = errorData.msg || 'Failed to add product. Please try again.';
+                    messageElement.style.color = 'red';
+                }
+            } catch (error) {
+                document.getElementById('message').innerText = 'Error adding product. Please try again.';
+                document.getElementById('message').style.color = 'red';
+            }
+        });
+    </script>
+</body>
+
+</html>

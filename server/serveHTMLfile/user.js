@@ -26,5 +26,4 @@ router.get("/orders", (req, res) => {
     return res.sendFile(path.join(__dirname, "../../client/order/all-orders.html"));
 });
 
-
 module.exports = router;
