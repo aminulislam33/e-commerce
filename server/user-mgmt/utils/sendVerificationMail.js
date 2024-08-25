@@ -18,7 +18,7 @@ const sendVerificationEmail = async (user) => {
         to: user.email,
         subject: 'Email Verification',
         text: `Please verify your email by clicking on the following link: \n\n
-      ${process.env.BASE_URL}/api/auth/verify/${verificationToken}\n\n
+      ${process.env.BASE_URL}/user/auth/verify/${verificationToken}\n\n
       If you did not request this, please ignore this email.`,
     };
 

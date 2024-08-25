@@ -18,6 +18,10 @@ router.get("/signup", (req, res) => {
     return res.sendFile(path.join(__dirname, "../../client/user/signup.html"));
 });
 
+router.get("/auth/verify/:token", (req, res) => {
+    return res.sendFile(path.join(__dirname, "../../client/user/verify-email.html"));
+});
+
 router.get("/orders", (req, res) => {
     return res.sendFile(path.join(__dirname, "../../client/order/all-orders.html"));
 });

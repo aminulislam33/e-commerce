@@ -16,5 +16,4 @@ app.use('/user', require('./serveHTMLfile/renderFile'));
 
 app.get('/', (req,res)=>{return res.redirect('/user/dashboard')});
 
-
 module.exports = app;
