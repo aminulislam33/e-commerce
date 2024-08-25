@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .product-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px;
+            width: 200px;
+            text-align: center;
+        }
+
+        .product-card h3 a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .product-card h3 a:hover {
+            color: #007bff;
+        }
+
+        .product-image {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .product-price {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Product Dashboard</h1>
+    <div class="product-container" id="product-container">
+        <!-- Products will be dynamically loaded here -->
+    </div>
+
+    <script>
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/product/get-all-products');
+                const products = await response.json();
+                const productContainer = document.getElementById('product-container');
+
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+
+                    productCard.innerHTML = `
+                        <h3><a href="/user/product/${product._id}" target="_blank">${product.name}</a></h3>
+                        <img class="product-image" src="${product.image_url}" alt="${product.name}">
+                        <p>${product.description}</p>
+                        <p class="product-price">₹${product.price}</p>
+                        <p>Stock: ${product.stock}</p>
+                    `;
+
+                    productContainer.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+        }
+
+        loadProducts();
+    </script>
+
+</body>
+
+</html>

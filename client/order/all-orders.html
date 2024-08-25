@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Orders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .orders-container {
+            max-width: 1000px;
+            width: 100%;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .order {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+            text-align: left;
+        }
+
+        .order h2 {
+            margin-top: 0;
+        }
+
+        .order-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item img {
+            max-width: 50px;
+            max-height: 50px;
+            border-radius: 5px;
+        }
+
+        .order-item p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        .order-total {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .order-status {
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="orders-container" id="orders-container">
+        <!-- Orders will be dynamically loaded here -->
+    </div>
+
+    <script>
+        function getAuthToken() {
+            return localStorage.getItem('token') || '';
+        }
+
+        async function fetchUserData() {
+            try {
+                const response = await fetch('/api/auth/user', {
+                    headers: {
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+                return await response.json();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                throw error;
+            }
+        }
+
+        async function fetchUserOrders(userId) {
+            try {
+                const response = await fetch(`/api/order/user/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                return await response.json();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                throw error;
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const userData = await fetchUserData();
+                const userOrders = await fetchUserOrders(userData._id);
+
+                const ordersContainer = document.getElementById('orders-container');
+                if (userOrders.length === 0) {
+                    ordersContainer.innerHTML = '<p>No orders found</p>';
+                    return;
+                }
+
+                ordersContainer.innerHTML = userOrders.map(order => `
+                    <div class="order">
+                        <h2>Order ID: ${order._id}</h2>
+                        ${order.products.map(product => `
+                            <div class="order-item">
+                                ${product.product ? `<img src="${product.product.image}" alt="${product.product.name}">` : ''}
+                                <div>
+                                    <p>Product: ${product.product ? product.product.name : 'Unknown'}</p>
+                                    <p>Quantity: ${product.quantity}</p>
+                                    <p>Price: ₹${product.price.toFixed(2)}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                        <p class="order-total">Total Amount: ₹${order.totalAmount.toFixed(2)}</p>
+                        <p class="order-status">Status: ${order.status}</p>
+                        <p class="order-date">Order Date: ${new Date(order.createdAt).toLocaleDateString()}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        loadOrders();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <style>
+        /* existing styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .product-detail {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .product-detail img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .product-detail h1 {
+            margin-top: 0;
+            font-size: 2em;
+            color: #333;
+        }
+
+        .product-detail p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .product-price {
+            font-size: 1.5em;
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .product-stock {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #dc3545;
+        }
+
+        .order-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .order-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .quantity-input {
+            margin-top: 10px;
+            font-size: 1em;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="product-detail" id="product-detail">
+        <!-- Product details will be dynamically loaded here -->
+    </div>
+
+    <script>
+        let currentProduct = null; // Global variable to store the product data
+
+        async function loadProduct() {
+            const productId = window.location.pathname.split('/').pop();
+            const apiUrl = `/api/product/${productId}`;
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error('Product not found');
+                }
+                currentProduct = await response.json(); // Store product data in global variable
+
+                const productDetail = document.getElementById('product-detail');
+                productDetail.innerHTML = `
+                    <h1>${currentProduct.name}</h1>
+                    <img src="${currentProduct.image_url}" alt="${currentProduct.name}">
+                    <p>${currentProduct.description}</p>
+                    <p class="product-price">₹${currentProduct.price}</p>
+                    <p class="product-stock">Stock: ${currentProduct.stock}</p>
+                    <input type="number" id="quantity" class="quantity-input" min="1" max="${currentProduct.stock}" placeholder="Quantity" />
+                    <button class="order-button" id="place-order">Place Order</button>
+                `;
+
+                document.getElementById('place-order').addEventListener('click', placeOrder);
+            } catch (error) {
+                const productDetail = document.getElementById('product-detail');
+                productDetail.innerHTML = `
+                    <h1>Product Not Found</h1>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+
+        function getAuthToken() {
+            return localStorage.getItem('token') || '';
+        }
+
+        async function placeOrder() {
+            if (!currentProduct) {
+                alert('No product data available');
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value, 10);
+            if (isNaN(quantity) || quantity < 1 || quantity > currentProduct.stock) {
+                alert('Invalid quantity');
+                return;
+            }
+
+            const order = {
+                products: [{
+                    product: currentProduct._id, // Use product ID as a string
+                    quantity: quantity,
+                    price: currentProduct.price
+                }],
+                totalAmount: currentProduct.price * quantity // Calculate total amount
+            };
+
+            try {
+                const response = await fetch('/api/order/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    },
+                    body: JSON.stringify(order)
+                });
+                if (!response.ok) {
+                    throw new Error('Order placement failed');
+                }
+                const result = await response.json();
+                alert('Order placed successfully');
+                window.location.href = '/user/orders';
+                // Optionally, you can redirect the user or clear the form
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        loadProduct();
+    </script>
+
+</body>
+
+</html>

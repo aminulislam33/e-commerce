@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/add-product', verifyToken, authorizeRoles(['admin']), createProduct);
 router.put('/:id', verifyToken, authorizeRoles(['admin']), updateSingleProduct);
 router.delete('/:id', verifyToken, authorizeRoles(['admin']), deleteSingleProduct);
-router.get('/get-all-product', getAllProduct);
+router.get('/get-all-products', getAllProduct);
 router.get('/:id', getSingleProduct);
 
 module.exports = router;

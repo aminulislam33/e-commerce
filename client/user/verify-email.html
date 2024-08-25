@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Email Verification</h1>
+        <div id="message"></div>
+        <a href="/auth/login" id="login-link" style="display: none;">Go to Login</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token'); // Extract the token from the URL
+
+            if (!token) {
+                document.getElementById('message').textContent = 'Invalid or missing token.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/auth/verify/${token}`, {
+                    method: 'GET'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('message').textContent = result.msg || 'Email verified successfully!';
+                    document.getElementById('login-link').style.display = 'block';
+                } else {
+                    document.getElementById('message').textContent = result.msg || 'Email verification failed.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = 'An error occurred. Please try again.';
+            }
+        });
+    </script>
+</body>
+
+</html>
