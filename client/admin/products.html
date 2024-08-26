@@ -22,6 +22,7 @@
                     <th class="py-2">Description</th>
                     <th class="py-2">Price</th>
                     <th class="py-2">Stock</th>
+                    <th class="py-2">Category</th>
                     <th class="py-2">Actions</th>
                 </tr>
             </thead>
@@ -50,6 +51,15 @@
                 <div class="mb-4">
                     <label for="stock" class="block text-gray-700">Stock</label>
                     <input type="number" id="stock" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div class="mb-4">
+                    <label for="category" class="block text-gray-700">Category</label>
+                    <select id="category" class="w-full px-4 py-2 border rounded">
+                        <option value="">Select Category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Home">Home</option>
+                    </select>
                 </div>
                 <div class="mb-4">
                     <label for="image_url" class="block text-gray-700">Image URL</label>
@@ -83,6 +93,7 @@
                         <td class="py-2">${product.description}</td>
                         <td class="py-2">₹${product.price}</td>
                         <td class="py-2">${product.stock}</td>
+                        <td class="py-2">${product.category}</td>
                         <td class="py-2">
                             <button onclick="editProduct('${product._id}')" class="bg-yellow-500 text-white px-4 py-2 rounded">Edit</button>
                             <button onclick="deleteProduct('${product._id}')" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
@@ -114,9 +125,10 @@
             const description = document.getElementById('description').value;
             const price = document.getElementById('price').value;
             const stock = document.getElementById('stock').value;
+            const category = document.getElementById('category').value;
             const imageUrl = document.getElementById('image_url').value;
 
-            const product = { name, description, price, stock, image_url: imageUrl };
+            const product = { name, description, price, stock, category, image: imageUrl };
 
             if (id) {
                 await fetch(`/api/product/update/${id}`, {
@@ -144,19 +156,19 @@
 
         async function editProduct(id) {
             const token = localStorage.getItem('token');
-            const response = await fetch(`/api/product/${id}`, { // Use GET method for fetching product details
+            const response = await fetch(`/api/product/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             const product = await response.json();
-            console.log(product); // Check if data is correct
 
             document.getElementById('product-id').value = product._id;
             document.getElementById('name').value = product.name;
             document.getElementById('description').value = product.description;
             document.getElementById('price').value = product.price;
             document.getElementById('stock').value = product.stock;
+            document.getElementById('category').value = product.category;
             document.getElementById('image_url').value = product.image_url;
 
             document.getElementById('modal-title').textContent = 'Edit Product';

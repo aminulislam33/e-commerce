@@ -27,10 +27,7 @@
 
             try {
                 const response = await fetch(`/api/auth/verify/${token}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    method: 'GET'
                 });
 
                 const result = await response.json();
