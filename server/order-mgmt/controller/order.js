@@ -36,6 +36,16 @@ async function multipleOrder(req, res) {
     }
 };
 
+async function getAllOrders(req, res) {
+    console.log("getAllOrders");
+    try {
+        const orders = await Order.find({})
+        res.status(200).json(orders);
+    } catch (err) {
+        res.status(500).json({ msg: 'Server error', error: err.message });
+    }
+}
+
 async function updateOrderStatus(req, res) {
     const { id } = req.params;
     const { status } = req.body;
@@ -64,5 +74,6 @@ module.exports = {
     singleOrder,
     multipleOrder,
     updateOrderStatus,
-    deleteOrder
+    deleteOrder,
+    getAllOrders
 };

@@ -46,6 +46,7 @@ async function updateSingleProduct(req, res) {
 
 async function deleteSingleProduct(req, res) {
     const { id } = req.params;
+    console.log("request received: ", id);
     try {
         const product = await Product.findByIdAndDelete(id);
         if (!product) return res.status(404).json({ msg: 'Product not found' });

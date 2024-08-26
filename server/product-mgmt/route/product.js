@@ -4,9 +4,9 @@ const verifyToken = require('../../user-mgmt/utils/verifyToken');
 const authorizeRoles = require('../../user-mgmt/middleware/auth');
 const router = express.Router();
 
-router.post('/add-product', verifyToken, authorizeRoles(['admin']), createProduct);
-router.put('/:id', verifyToken, authorizeRoles(['admin']), updateSingleProduct);
-router.delete('/:id', verifyToken, authorizeRoles(['admin']), deleteSingleProduct);
+router.post('/add', verifyToken, authorizeRoles(['admin']), createProduct);
+router.put('/update/:id', verifyToken, authorizeRoles(['admin']), updateSingleProduct);
+router.delete('/delete/:id', verifyToken, authorizeRoles(['admin']), deleteSingleProduct);
 router.get('/get-all-products', getAllProduct);
 router.get('/:id', getSingleProduct);
 

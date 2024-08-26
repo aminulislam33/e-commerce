@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Manage Products</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100">
 
     <div class="container mx-auto mt-8">
         <h1 class="text-2xl font-bold mb-4">Product Management</h1>
-        
-        <!-- Add Product Button -->
+
         <button id="add-product-btn" class="bg-blue-500 text-white px-4 py-2 rounded">Add Product</button>
 
-        <!-- Product Table -->
         <table class="min-w-full bg-white mt-4">
             <thead>
                 <tr>
@@ -27,12 +26,10 @@
                 </tr>
             </thead>
             <tbody id="product-table-body">
-                <!-- Dynamic content will be inserted here -->
             </tbody>
         </table>
     </div>
 
-    <!-- Add/Edit Product Modal -->
     <div id="product-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded-lg shadow-lg">
             <h2 id="modal-title" class="text-xl font-bold mb-4">Add/Edit Product</h2>
@@ -69,7 +66,12 @@
     <script>
         async function loadProducts() {
             try {
-                const response = await fetch('/api/admin/products');
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/product/get-all-products', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 const products = await response.json();
                 const tableBody = document.getElementById('product-table-body');
                 tableBody.innerHTML = '';
@@ -106,6 +108,7 @@
 
         document.getElementById('product-form').addEventListener('submit', async (event) => {
             event.preventDefault();
+            const token = localStorage.getItem('token');
             const id = document.getElementById('product-id').value;
             const name = document.getElementById('name').value;
             const description = document.getElementById('description').value;
@@ -116,19 +119,19 @@
             const product = { name, description, price, stock, image_url: imageUrl };
 
             if (id) {
-                // Edit Product
-                await fetch(`/api/product/${id}`, {
+                await fetch(`/api/product/update/${id}`, {
                     method: 'PUT',
                     headers: {
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(product)
                 });
             } else {
-                // Add Product
-                await fetch('/api/product/add-product', {
+                await fetch('/api/product/add', {
                     method: 'POST',
                     headers: {
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(product)
@@ -140,8 +143,14 @@
         });
 
         async function editProduct(id) {
-            const response = await fetch(`/api/admin/products/${id}`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/product/${id}`, { // Use GET method for fetching product details
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const product = await response.json();
+            console.log(product); // Check if data is correct
 
             document.getElementById('product-id').value = product._id;
             document.getElementById('name').value = product.name;
@@ -155,9 +164,22 @@
         }
 
         async function deleteProduct(id) {
+            const token = localStorage.getItem('token');
             if (confirm('Are you sure you want to delete this product?')) {
-                await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
-                loadProducts();
+                try {
+                    const response = await fetch(`/api/product/delete/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to delete product');
+                    }
+                    loadProducts();
+                } catch (error) {
+                    console.error('Error deleting product:', error);
+                }
             }
         }
 
@@ -165,4 +187,5 @@
     </script>
 
 </body>
+
 </html>

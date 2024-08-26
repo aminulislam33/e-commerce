@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Manage Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="container mx-auto mt-8">
+        <h1 class="text-2xl font-bold mb-4">Order Management</h1>
+
+        <button id="add-order-btn" class="bg-blue-500 text-white px-4 py-2 rounded">Add Order</button>
+
+        <table class="min-w-full bg-white mt-4">
+            <thead>
+                <tr>
+                    <th class="py-2">Order ID</th>
+                    <th class="py-2">Customer Name</th>
+                    <th class="py-2">Order Date</th>
+                    <th class="py-2">Total Amount</th>
+                    <th class="py-2">Status</th>
+                    <th class="py-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="order-table-body">
+            </tbody>
+        </table>
+    </div>
+
+    <div id="order-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 id="modal-title" class="text-xl font-bold mb-4">Add/Edit Order</h2>
+            <form id="order-form">
+                <input type="hidden" id="order-id">
+                <div class="mb-4">
+                    <label for="customer-name" class="block text-gray-700">Customer Name</label>
+                    <input type="text" id="customer-name" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div class="mb-4">
+                    <label for="order-date" class="block text-gray-700">Order Date</label>
+                    <input type="date" id="order-date" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div class="mb-4">
+                    <label for="total-amount" class="block text-gray-700">Total Amount</label>
+                    <input type="number" id="total-amount" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div class="mb-4">
+                    <label for="status" class="block text-gray-700">Status</label>
+                    <select id="status" class="w-full px-4 py-2 border rounded">
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancel-btn" class="mr-4 px-4 py-2 bg-gray-300 rounded">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function loadOrders() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/order/orders', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+
+                const orders = await response.json();
+                console.log('Orders fetched:', orders); // Debugging
+
+                const tableBody = document.getElementById('order-table-body');
+                tableBody.innerHTML = '';
+
+                orders.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="py-2">${order._id}</td>
+                        <td class="py-2">${order.customerName}</td>
+                        <td class="py-2">${new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td class="py-2">₹${order.totalAmount}</td>
+                        <td class="py-2">${order.status}</td>
+                        <td class="py-2">
+                            <button onclick="editOrder('${order._id}')" class="bg-yellow-500 text-white px-4 py-2 rounded">Update</button>
+                            <button onclick="deleteOrder('${order._id}')" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        document.getElementById('add-order-btn').addEventListener('click', () => {
+            document.getElementById('modal-title').textContent = 'Add Order';
+            document.getElementById('order-form').reset();
+            document.getElementById('order-id').value = '';
+            document.getElementById('order-modal').classList.remove('hidden');
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', () => {
+            document.getElementById('order-modal').classList.add('hidden');
+        });
+
+        document.getElementById('order-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const token = localStorage.getItem('token');
+            const id = document.getElementById('order-id').value;
+            const customerName = document.getElementById('customer-name').value;
+            const orderDate = document.getElementById('order-date').value;
+            const totalAmount = document.getElementById('total-amount').value;
+            const status = document.getElementById('status').value;
+
+            const order = { customerName, orderDate, totalAmount, status };
+
+            try {
+                if (id) {
+                    const response = await fetch(`/api/order/update/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(order)
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to update order');
+                    }
+                } else {
+                    const response = await fetch('/api/order/add', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(order)
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to add order');
+                    }
+                }
+
+                document.getElementById('order-modal').classList.add('hidden');
+                loadOrders();
+            } catch (error) {
+                console.error('Error saving order:', error);
+            }
+        });
+
+        async function editOrder(id) {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`/api/order/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch order');
+                }
+                const order = await response.json();
+                console.log('Order fetched for edit:', order); // Debugging
+
+                document.getElementById('order-id').value = order._id;
+                document.getElementById('customer-name').value = order.customerName;
+                document.getElementById('order-date').value = new Date(order.orderDate).toISOString().split('T')[0];
+                document.getElementById('total-amount').value = order.totalAmount;
+                document.getElementById('status').value = order.status;
+
+                document.getElementById('modal-title').textContent = 'Edit Order';
+                document.getElementById('order-modal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error fetching order for edit:', error);
+            }
+        }
+
+        async function deleteOrder(id) {
+            const token = localStorage.getItem('token');
+            if (confirm('Are you sure you want to delete this order?')) {
+                try {
+                    const response = await fetch(`/api/order/delete/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to delete order');
+                    }
+                    loadOrders();
+                } catch (error) {
+                    console.error('Error deleting order:', error);
+                }
+            }
+        }
+
+        loadOrders();
+    </script>
+
+</body>
+
+</html>

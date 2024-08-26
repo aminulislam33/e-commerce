@@ -15,4 +15,8 @@ router.get('/products', adminAuth, (req,res)=>{
     return res.sendFile(path.join(__dirname, "../../../client/admin/products.html"));
 });
 
+router.get('/orders', adminAuth, (req,res)=>{
+    return res.sendFile(path.join(__dirname, "../../../client/admin/order.html"));
+});
+
 module.exports = router;
