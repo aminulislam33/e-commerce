@@ -11,4 +11,8 @@ router.get('/dashboard', adminAuth, (req,res)=>{
     return res.sendFile(path.join(__dirname, "../../../client/admin/admin-dashboard.html"));
 });
 
+router.get('/products', adminAuth, (req,res)=>{
+    return res.sendFile(path.join(__dirname, "../../../client/admin/products.html"));
+});
+
 module.exports = router;

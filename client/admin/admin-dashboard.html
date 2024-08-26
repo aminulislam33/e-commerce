@@ -1,187 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="admin-dashboard.css">
-    <style>
-        /* General Styles */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-
-        .wrapper {
-            display: flex;
-            width: 100%;
-        }
-
-        /* Sidebar Styles */
-        #sidebar {
-            width: 250px;
-            background: #333;
-            color: #fff;
-            min-height: 100vh;
-            position: fixed;
-        }
-
-        #sidebar .sidebar-header {
-            padding: 20px;
-            background: #444;
-            text-align: center;
-        }
-
-        #sidebar ul.components {
-            padding: 20px 0;
-            list-style: none;
-        }
-
-        #sidebar ul li {
-            padding: 10px;
-            font-size: 16px;
-            color: #ccc;
-        }
-
-        #sidebar ul li a {
-            color: #ccc;
-            text-decoration: none;
-            display: block;
-            transition: 0.3s;
-        }
-
-        #sidebar ul li a:hover {
-            color: #fff;
-            background: #444;
-        }
-
-        #sidebar ul li.active a {
-            color: #fff;
-            background: #444;
-        }
-
-        /* Content Styles */
-        #content {
-            width: calc(100% - 250px);
-            margin-left: 250px;
-            padding: 20px;
-            background: #fff;
-            min-height: 100vh;
-        }
-
-        #content h2 {
-            margin-top: 0;
-            color: #333;
-        }
-
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100">
 
-<body>
-
-    <div class="wrapper">
-        <!-- Sidebar -->
-        <nav id="sidebar">
-            <div class="sidebar-header">
-                <h3>Admin Panel</h3>
-            </div>
-            <ul class="list-unstyled components">
-                <li class="active">
-                    <a href="#dashboard">Dashboard</a>
-                </li>
-                <li>
-                    <a href="#products">Products</a>
-                </li>
-                <li>
-                    <a href="#orders">Orders</a>
-                </li>
-                <li>
-                    <a href="#categories">Categories</a>
-                </li>
-                <li>
-                    <a href="#users">Users</a>
-                </li>
-                <li>
-                    <a href="#" id="logoutButton">Logout</a>
-                </li>
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 h-screen fixed">
+        <div class="p-4 text-white font-bold text-xl">
+            Admin Panel
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/admin/dashboard" class="block p-4 text-white hover:bg-gray-700">Dashboard</a></li>
+                <li><a href="/admin/products" class="block p-4 text-white hover:bg-gray-700">Products</a></li>
+                <li><a href="/admin/orders" class="block p-4 text-white hover:bg-gray-700">Orders</a></li>
+                <li><a href="/admin/users" class="block p-4 text-white hover:bg-gray-700">Users</a></li>
+                <li><a href="/admin/settings" class="block p-4 text-white hover:bg-gray-700">Settings</a></li>
             </ul>
         </nav>
+    </aside>
 
-        <!-- Page Content -->
-        <div id="content">
-            <div id="dashboard" class="content-section">
-                <h2>Dashboard</h2>
-                <p>Welcome to the Admin Dashboard!</p>
-                <!-- Add your dashboard content here -->
+    <!-- Main Content -->
+    <main class="ml-64 p-6">
+        <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+
+        <!-- Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-2">Total Sales</h2>
+                <p id="total-sales" class="text-3xl font-bold">₹0</p>
             </div>
-
-            <div id="products" class="content-section" style="display:none;">
-                <h2>Products</h2>
-                <p>Manage your products here.</p>
-                <!-- Add your products management content here -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-2">Total Orders</h2>
+                <p id="total-orders" class="text-3xl font-bold">0</p>
             </div>
-
-            <div id="orders" class="content-section" style="display:none;">
-                <h2>Orders</h2>
-                <p>Manage your orders here.</p>
-                <!-- Add your orders management content here -->
-            </div>
-
-            <div id="categories" class="content-section" style="display:none;">
-                <h2>Categories</h2>
-                <p>Manage your categories here.</p>
-                <!-- Add your categories management content here -->
-            </div>
-
-            <div id="users" class="content-section" style="display:none;">
-                <h2>Users</h2>
-                <p>Manage your users here.</p>
-                <!-- Add your users management content here -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-2">New Users</h2>
+                <p id="new-users" class="text-3xl font-bold">0</p>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const sections = document.querySelectorAll('.content-section');
-            const links = document.querySelectorAll('#sidebar ul li a');
+        // Fetch and display dashboard data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/admin/dashboard-data');
+                const data = await response.json();
 
-            links.forEach(link => {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
+                document.getElementById('total-sales').textContent = `₹${data.totalSales}`;
+                document.getElementById('total-orders').textContent = data.totalOrders;
+                document.getElementById('new-users').textContent = data.newUsers;
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
 
-                    links.forEach(link => link.parentElement.classList.remove('active'));
-                    this.parentElement.classList.add('active');
-
-                    sections.forEach(section => section.classList.remove('active'));
-                    const targetSection = document.querySelector(this.getAttribute('href'));
-                    if (targetSection) {
-                        targetSection.classList.add('active');
-                    }
-                });
-            });
-
-            // Logout functionality
-            document.getElementById('logoutButton').addEventListener('click', function () {
-                localStorage.removeItem('token');
-                window.location.href = '/admin-login.html';
-            });
-
-            // Load the dashboard section by default
-            document.querySelector('#dashboard').classList.add('active');
-        });
-
+        loadDashboardData();
     </script>
-</body>
 
+</body>
 </html>
