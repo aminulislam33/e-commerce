@@ -5,33 +5,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoCart - Home</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100">
 
-    <!-- Navbar -->
     <nav class="bg-gray-800 p-4">
         <div class="container mx-auto flex justify-between items-center">
             <a href="/user/dashboard" class="text-white text-xl font-bold">EcoCart</a>
-            <button id="menu-btn" class="text-white block lg:hidden focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-            <ul id="menu" class="hidden lg:flex space-x-6 text-white">
-                <li><a href="/admin/login" id="admin-link" class="hover:text-blue-400">Admin</a></li>
-                <li><a href="/user/orders" class="hover:text-blue-400">My Orders</a></li>
-                <li id="profile-container" class="relative">
-                    <button id="profile-button" class="text-white hover:text-blue-400 focus:outline-none">User Name</button>
-                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg hidden">
+            <div class="relative lg:hidden">
+                <button id="menu-btn" class="text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                <ul id="mobile-menu"
+                    class="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-600 rounded-lg shadow-lg hidden">
+                    <li id="mobile-profile-container" class="hidden">
+                        <a href="/profile" class="block px-4 py-2 text-white hover:bg-gray-700">Profile</a>
+                        <a href="/user/orders" class="block px-4 py-2 text-white hover:bg-gray-700">My Orders</a>
+                        <button id="mobile-logout-button"
+                            class="block w-full text-left px-4 py-2 text-white hover:bg-gray-700">Logout</button>
+                    </li>
+                    <li id="mobile-login-link" class="block">
+                        <a href="/user/login" class="block px-4 py-2 text-white hover:bg-gray-700">Login</a>
+                    </li>
+                </ul>
+            </div>
+            <ul id="desktop-menu" class="hidden lg:flex lg:items-center space-x-6 text-white">
+                <li id="desktop-profile-container" class="relative hidden">
+                    <button id="profile-button" class="text-white hover:text-blue-400 focus:outline-none">User
+                        Name</button>
+                    <div id="profile-dropdown"
+                        class="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg hidden">
                         <a href="/profile" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Profile</a>
                         <a href="/user/orders" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">My Orders</a>
-                        <button id="logout-button" class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</button>
+                        <button id="logout-button"
+                            class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</button>
                     </div>
                 </li>
-                <li><a href="/user/login" id="login-link" class="hover:text-blue-400">Login</a></li>
+                <li id="desktop-login-link" class="block">
+                    <a href="/user/login" class="hover:text-blue-400">Login</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -40,43 +57,72 @@
 
     <div class="container mx-auto px-4">
         <div id="product-container" class="flex flex-wrap justify-center gap-6">
-            <!-- Products will be dynamically loaded here -->
         </div>
     </div>
 
     <script>
-        // Toggle Navbar for Mobile View
         document.getElementById('menu-btn').addEventListener('click', () => {
-            const menu = document.getElementById('menu');
-            menu.classList.toggle('hidden');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
         });
 
-        // Check if the user is logged in
-        function checkLoginStatus() {
-            const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
-
+        async function fetchUserData() {
+            const token = localStorage.getItem('token');
             if (token) {
-                // User is logged in
-                document.getElementById('login-link').classList.add('hidden');
-                document.getElementById('profile-container').classList.remove('hidden');
-            } else {
-                // User is not logged in
-                document.getElementById('login-link').classList.remove('hidden');
-                document.getElementById('profile-container').classList.add('hidden');
+                try {
+                    const response = await fetch('/api/auth/user', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        },
+                    });
+                    if (response.ok) {
+                        const user = await response.json();
+                        return user;
+                    } else {
+                        console.error('Failed to fetch user data');
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
             }
+            return null;
         }
 
-        // Toggle Dropdown Menu
-        document.getElementById('profile-button').addEventListener('click', () => {
-            const dropdown = document.getElementById('profile-dropdown');
-            dropdown.classList.toggle('hidden');
-        });
+        async function checkLoginStatus() {
+            const user = await fetchUserData();
 
-        // Logout button
-        document.getElementById('logout-button').addEventListener('click', () => {
-            localStorage.removeItem('token');
-            checkLoginStatus();
-        });
+            if (user) {
+                document.getElementById('desktop-login-link').classList.add('hidden');
+                document.getElementById('mobile-login-link').classList.add('hidden');
+                document.getElementById('desktop-profile-container').classList.remove('hidden');
+                document.getElementById('mobile-profile-container').classList.remove('hidden');
+
+                const userName = user.name || 'User';
+                document.getElementById('profile-button').textContent = userName;
+
+                document.getElementById('profile-button').addEventListener('click', () => {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+
+                document.getElementById('logout-button').addEventListener('click', () => {
+                    localStorage.removeItem('token');
+                    checkLoginStatus();
+                });
+
+                document.getElementById('mobile-logout-button').addEventListener('click', () => {
+                    localStorage.removeItem('token');
+                    checkLoginStatus();
+                });
+
+            } else {
+                document.getElementById('desktop-login-link').classList.remove('hidden');
+                document.getElementById('mobile-login-link').classList.remove('hidden');
+                document.getElementById('desktop-profile-container').classList.add('hidden');
+                document.getElementById('mobile-profile-container').classList.add('hidden');
+            }
+        }
 
         checkLoginStatus();
 
@@ -91,13 +137,13 @@
                     productCard.className = 'bg-white p-4 rounded-lg shadow-md w-64 text-center';
 
                     productCard.innerHTML = `
-                        <h3 class="text-lg font-semibold mb-2"><a href="/user/product/${product._id}" target="_blank" class="text-gray-800 hover:text-blue-500">${product.name}</a></h3>
-                        <p class="text-gray-600 mb-2">${product.category}</p>
-                        <img class="w-full h-40 object-cover mb-4" src="${product.image}" alt="${product.name}">
-                        <p class="text-gray-600 mb-2">${product.description}</p>
-                        <p class="text-green-600 font-bold text-lg">₹${product.price}</p>
-                        <p class="text-gray-500">Stock: ${product.stock}</p>
-                    `;
+            <h3 class="text-lg font-semibold mb-2"><a href="/user/product/${product._id}" target="_blank" class="text-gray-800 hover:text-blue-500">${product.name}</a></h3>
+            <p class="text-gray-600 mb-2">${product.category}</p>
+            <img class="w-full h-40 object-cover mb-4" src="${product.image}" alt="${product.name}">
+                <p class="text-gray-600 mb-2">${product.description}</p>
+                <p class="text-green-600 font-bold text-lg">₹${product.price}</p>
+                <p class="text-gray-500">Stock: ${product.stock}</p>
+                `;
 
                     productContainer.appendChild(productCard);
                 });

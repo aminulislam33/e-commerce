@@ -32,6 +32,16 @@ async function getSingleProduct(req, res) {
     }
 };
 
+async function getSimilarProducts(req, res) {
+    try {
+        const { category } = req.params;
+        const similarProducts = await Product.find({ category: category }).limit(10); // Adjust limit as needed
+        res.json(similarProducts);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching similar products', error: error.message });
+    }
+};
+
 async function updateSingleProduct(req, res) {
     const { id } = req.params;
     const { name, description, price, image, category, stock } = req.body;
@@ -54,12 +64,13 @@ async function deleteSingleProduct(req, res) {
     } catch (err) {
         res.status(500).json({ msg: 'Server error', error: err.message });
     }
-}
+};
 
 module.exports = {
     createProduct,
     getAllProduct,
     getSingleProduct,
+    getSimilarProducts,
     updateSingleProduct,
     deleteSingleProduct
 };
