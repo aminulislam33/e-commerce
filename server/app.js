@@ -15,6 +15,7 @@ app.use('/api/auth', require('./user-mgmt/router/auth'));
 app.use('/api/product', require('./product-mgmt/route/product'));
 app.use('/api/order', require('./order-mgmt/route/order'));
 app.use('/api/admin', require('./admin-mgmt/route/auth'));
+app.use('/api/address', require('./address-mgmt/route/addressRoute'));
 
 app.use('/admin', require('./admin-mgmt/route/serveHTMLfile'));
 app.use('/user', require('./serveHTMLfile/user'));
